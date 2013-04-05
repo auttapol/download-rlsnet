@@ -20,18 +20,32 @@ html
 			script(src = "http://html5shim.googlecode.com/svn/trunk/html5.js")
 	body
 		#sn
-		#main			
-			#text
-				.container
-					.row
-						.span12
-							.well
-								h4 Стандарт-Н
-			#signin
-			#controls
-			#table
-			#pagination
-			#stat
+		#main
+			.container
+				.row
+					.span12
+						p
+							a#btn-start.btn.btn-medium.btn-primary(href = "#") 
+								i.icon-play.icon-white
+								&nbsp;
+								Старт
+							a#btn-stop.hide.btn.btn-medium.btn-danger(href = "#") 
+								i.icon-pause.icon-white
+								&nbsp;
+								Стоп
+							input#status(type = "hidden", value = "stop")
+							&nbsp;
+							a#btn-open.btn.btn-medium(href = "http://www.4doktor.ru/?subid=0&sort=Title%20ASC&page=0", target = "_blank")
+								i.icon-share
+								&nbsp;
+								Открыть страницу
+
+						.well.well-small
+							input#page-first.input-small(type = "text", placeholder = "Начальная страница", value = "0")
+							input#page-last.input-small(type = "text", placeholder = "Конечная страница", value = "10")
+
+						.well
+							#response
 
 		#js
 			script(src = "public/assets/client.js", type = "text/javascript")

@@ -7,8 +7,9 @@ public static $page;
 public static $id;
 public static $message;
 public static $login;
+public static $first;
+public static $last;
 public static $password;
-
 
 function __construct() {
 
@@ -37,6 +38,17 @@ function __construct() {
 	}
 	if (isset($_REQUEST["message"])) {
 		self::$message=trim(strval($_REQUEST["message"]));
+	}
+
+	if (isset($_REQUEST["first"])) {
+		self::$first=trim(intval($_REQUEST["first"]));
+	} else {
+		self::$first=0;	
+	}
+	if (isset($_REQUEST["last"])) {
+		self::$last=trim(intval($_REQUEST["last"]));
+	} else {
+		self::$last=0;
 	}
 	
 }

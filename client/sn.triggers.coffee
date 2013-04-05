@@ -1,51 +1,21 @@
 $ ->
 	methods=
 		init: ->
-			if $("#claims").html()!=""
-				$(this).snTriggers 'table'
-			if $("#pagination").html()!=""
-				$(this).snTriggers 'pagination'
-			if $("#signin").html()!=""
-				$(this).snTriggers 'signin'
-		signin: ->
+			$(this).snTriggers 'start'
+			$(this).snTriggers 'stop'
+
+		start: ->
 			th=$(this)
-			$("#fSignin").on "submit",(e) ->
+			$("#btn-start").on "click",(e) ->
 				e.preventDefault()
-				th.snEvents href:'#signin'
-		table: ->
+				if parseInt($('#page-first').val()) <= parseInt($('#page-last').val())
+					th.snEvents href:'#start'
+
+		stop: ->
 			th=$(this)
-			$(".status").on "keyup",() ->
-				th.snAjax 'sendRequest',
-						action:'edit'
-						id:$(this).data 'id'
-						message:$(this).val()
-						debug:false
-			$(".status").on "blur",() ->
-				th.snAjax 'sendRequest',
-						action:'edit'
-						id:$(this).data 'id'
-						message:$(this).val()
-						debug:false
-		pagination: ->
-			th=$(this)
-			$("a#prev").on "click",(e) ->
+			$("#btn-stop").on "click",(e) ->
 				e.preventDefault()
-				$("#page").val $("#page").val()*1-1
-				th.snAjax 'sendRequest'
-						action:'signin'
-						debug:false
-			$("a.list").on "click",(e) ->
-				e.preventDefault()
-				$("#page").val $(this).data "page"
-				th.snAjax 'sendRequest'
-						action:'signin'
-						debug:false
-			$("a#next").on "click",(e) ->
-				e.preventDefault()
-				$("#page").val $("#page").val()*1+1
-				th.snAjax 'sendRequest'
-						action:'signin'
-						debug:false
+				th.snEvents href:'#stop'
 
 	$.fn.snTriggers= (sn) ->
 		sn={} if !sn

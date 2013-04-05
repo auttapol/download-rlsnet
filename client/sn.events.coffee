@@ -8,32 +8,34 @@ $ ->
 			href=def.href
 			switch href.replace /(.*)#(.*)/,'$2'
 				when "autoload" then
-				when "signin"
-					$("#signin-error").hide()
-					$(this).snAjax 'sendRequest',(action:'signin',debug:false)
-				when "afterSignin"
+				
+				when "get"
+					$(this).snAjax 'sendRequest',(action:'get',debug:false)
+				
+				when "afterGet"
+					# alert sn.result.text
 					if sn.result
 						if sn.result.response
-							if sn.result.claims
-								$('#claims').html sn.result.claims
-								$(this).snTriggers 'table'
-							if sn.result.pagination
-								$("#pagination").html sn.result.pagination
-								$(this).snTriggers pagination
-							$("#signin").empty()
-						else
-							$("#inputLogin").val ''
-							$("#inputPassword").val ''
-							$("#signin-error").show()
-				when "submit"
-					$(this).snAjax 'sendRequest',(action:'submit',debug:false)
-				when "afterSubmit"
-					if sn.result
-						if sn.result.table
-							$("#table").html sn.result.table
-							$(this).snTriggers 'sort'
-							$(this).snTriggers 'detail'
-							$(this).snPlayer 'onClickPlay'
+							$("#response").html sn.result.text
+							# +$("#response").html()
+					$('#page-first').val parseInt($('#page-first').val())+1
+					if parseInt($('#page-first').val()) <= parseInt($('#page-last').val())
+						if $('#status').val() == 'start'
+							$(this).snEvents href:'#get'
+
+				when "start"
+					if $('#status').val() == 'stop'
+						$('#btn-start').hide()
+						$('#btn-stop').show()
+						$('#status').val('start')
+						$(this).snEvents href:'#get'
+
+				when "stop"
+					if $('#status').val() == 'start'
+						$('#btn-start').show()
+						$('#btn-stop').hide()
+						$('#status').val('stop')
+
 				when "close" then $(this).hide()
 
 

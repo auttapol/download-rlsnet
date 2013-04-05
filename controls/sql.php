@@ -6,22 +6,12 @@ function __construct() {
 
 }
 
-public static function claims($s="") {
-	$s.="select * from `standart_dataClaims` where (1=1) order by post_dt desc limit ".app::$skip.",".app::$limit." ";
+public static function ins($s="") {
+	$tm=time();
+	$s.="insert into `parse` (name,mnn,regnum,producer,packer,date,tm,page) values ('".app::$name."','".app::$mnn."','".app::$regnum."','".app::$producer."','".app::$packer."','".app::$date."',".$tm.",".url::$first.") ";
 	self::$request=$s;
 	return $s;
 }
 
-public static function pagination($s="") {
-	$s.="select COUNT(*) as count_id from `standart_dataClaims` where (1=1) order by post_dt desc ";
-	self::$request=$s;
-	return $s;
-}
-
-public static function edit($s="") {
-	$s.="update `standart_dataClaims` SET `status`='".iconv("UTF-8","cp1251",url::$message)."' where (id=".url::$id.") ";
-	self::$request=$s;
-	return $s;
-}
 
 } ?>

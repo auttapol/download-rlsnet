@@ -10,11 +10,9 @@ HR=\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\
 
 def: all
 
-all: folders client server finish
+all: client finish
 
 client: js css layout indexhtml
-
-server: node-app node-controls node-routes
 
 js: client-js main-js lmd
 
@@ -56,32 +54,6 @@ all-css:
 	@cat ./public/css/*.min.css > ./public/assets/style.css
 
 
-
-node-app:
-	@echo "\n app... \n"
-	@coffee -cbjvp ./script/app*.coffee > ./app
-
-node-controls:
-	@echo "\n controls... \n"
-	@rm -fR ./public/js/controls
-	@mkdir -p ./public/js/controls
-	@coffee -o ./public/js/controls -cb ./node_controls/
-
-node-routes:
-	@echo "\n routes... \n"
-	@rm -fR ./public/js/routes
-	@mkdir -p ./public/js/routes
-	@coffee -o ./public/js/routes -cb ./node_routes/
-
-
-
-start:
-	@echo "forever start -o ./log/out.log -e ./log/err.log app"
-	@forever start -o ./log/out.log -e ./log/err.log app
-
-stop:
-	@echo "stop app"
-	@forever stop app
 
 
 folders-tpl:

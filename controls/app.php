@@ -11,121 +11,104 @@ public static $pages;
 public static $limit;
 public static $records;
 public static $id;
+public static $first;
+public static $last;
+public static $text;
+public static $path;
 public static $message;
+
+public static $date;
+public static $name;
+public static $mnn;
+public static $regnum;
+public static $producer;
+public static $packer;
 
 function __construct() {
 	self::$id=0;
-	self::$message='';
-	self::$prev=false;
-	self::$next=false;
-	self::$skip=0;
-	self::$page=1;
-	self::$limit=20;
+	self::$first=0;
+	self::$last=1;
+	self::$text="";
 }
 
-function claims($pc=array(),$i=-1) {
-	if (query(sql::claims(),$ms)) {
-		foreach ($ms as $r) { $i++;
-			$pc[$i]['id']=$r->id;
-			$pc[$i]['caption']=toUTF($r->caption);
-			$pc[$i]['msg']=$r->msg;
-			$pc[$i]['email']=$r->email;
-			$pc[$i]['skype']=$r->skype;
-			$pc[$i]['icq']=$r->icq;
-			$pc[$i]['site']=$r->site;
-			$pc[$i]['city']=toUTF($r->city);
-			$pc[$i]['country']=$r->country;
-			$pc[$i]['status']=toUTF($r->status);
-			$pc[$i]['comment']=$r->comment;
-			$pc[$i]['post_dt']=self::setDate($r->post_dt);
-			foreach (array("email","skype","icq","city","status","site") as $key) {
-				if ($pc[$i][$key]=="") { $pc[$i][$key]="-"; }
-			}	
-			if ($r->status=="New") {
-				$pc[$i]['line_class']="error";
-			} else {
-				$pc[$i]['line_class']="";
-			}
-		}
-		return $pc;
-	}
-	return false;
+public static function getContent($t="") {
+	$t=preg_replace('/\r/m',"",$t);
+	$t=preg_replace('/\n/m',"",$t);
+	$t=preg_replace('/\t/m',"",$t);
+	preg_match_all('/<table border="0" cellpadding="0" cellspacing="0" class="grid">(.*?)<\/table>/i',$t,$c,PREG_PATTERN_ORDER);
+	$t=$c[0][0];
+
+	$t=preg_replace('/<tr class="table_row">/mi',"<tr>",$t);
+	$t=preg_replace('/<tr >/mi',"<tr>",$t);
+	$t=preg_replace('/<td class="cell">/mi',"<td>",$t);
+
+	$t=preg_replace('/>[\s]*</i',"><",$t);
+	$t=preg_replace('/<\/tr>/i',"",$t);
+	$t=preg_replace('/<\/tr>/i',"",$t);
+	$t=preg_replace('/<\/td>/i',"",$t);
+	$t=preg_replace('/table>/i',"",$t);
+	$t=preg_replace('/~/i',"-",$t);
+	return $t;
 }
 
-function edit() {
-	if ((isset(url::$id)) && (isset(url::$message))) {
-		if ((intval(url::$id)>-1) && (intval(url::$id)<10000)) {
-			if (query(sql::edit())) {
-				return true;
-			}
+public static function get() {
+	$s=""; $i=-1;
+	self::$path="http://www.4doktor.ru/?subid=0&sort=Title%20ASC&page=".intval(url::$first);
+	$t=file_get_contents(self::$path);
+	if ($t) {
+		if ($t!="") {
+			$t=self::getContent($t);
+			$s=self::parseContent($t);
+			self::$text=$s;
 		}
 	}
-	return false;
+	return true;
 }
 
-function setDate($k,$type="day-month") { 
-	$s=""; $m=0; $mn=""; $i=0; $t="";
-	$dt=explode(" ",$k); $d=$dt[0]; $d=str_replace(".","-",$d); $d=str_replace(".","-",$d);
-	$di=explode("-",$d); $y=$di[0];
-	if (isset($dt[1])) {
-		$t=$dt[1];
+public static function parseContent($t,$s="") {
+	foreach (explode("<tr>",$t) as $str) { $i++;
+		if ($i>1) {
+			$line=explode("<td>", $str);
+			if (sizeof($line)>3) {
+				if (self::parseLine($line)) {
+					if (query(sql::ins())) {
+						$s.=self::getLineLog($line,$i);
+					}
+				}				
+			}
+		}
 	}
-	if (isset($di[1])) { $m=intval($di[1]); }
-	if (isset($di[2])) { $i=intval($di[2]); }
-	switch ($m) {
-		case 1: $mn="янв"; break;
-		case 2: $mn="фев"; break;
-		case 3: $mn="мар"; break;
-		case 4: $mn="апр"; break;
-		case 5: $mn="мая"; break;
-		case 6: $mn="июня"; break;
-		case 7: $mn="июля"; break;
-		case 8: $mn="авг"; break;
-		case 9: $mn="сен"; break;
-		case 10: $mn="окт"; break;
-		case 11: $mn="ноя"; break;
-		case 12: $mn="дек"; break;
-	}
-	if ($i==0) { $i=""; }
-	switch ($type) {
-		case "day-month": 			$s=trim($i." ".$mn); break;
-		case "day-month-time": 		$s=trim($i." ".$mn." ".$t); break;
-		case "day-month-year": 		$s=trim($i." ".$mn." ".$y); break;
-	}
-	if ($s=="") { $s="-"; }
 	return $s;
 }
 
-function pagination($list=array(),$i=0) {
-	if (isset(url::$page)) { self::$page=url::$page; }
-	if (query(sql::pagination(),$ms)) {
-		foreach ($ms as $r) {
-			self::$records=$r->count_id;
-		}
+public static function parseLine($line) {
+	self::$date=self::checkLine($line[1]);
+	self::$name=self::checkLine($line[2]);
+	self::$mnn=self::checkLine($line[3]);
+	self::$regnum=self::checkLine($line[4]);
+	self::$producer=self::checkLine($line[5]);
+	self::$packer=self::checkLine($line[6]);
+	if ((self::$name!="") && (self::$mnn!="")) {
+		return true;
 	}
-	self::$pages=ceil(self::$records/self::$limit);
-	self::$skip=(self::$page-1)*self::$limit;
-	
-	if (self::$page<1) { self::$page=1; }
-	if (self::$page>self::$pages) { self::$page=self::$pages; }
-	
-	if (((self::$page-6)>0) && !((self::$page+3)<(self::$pages+1))) { $list[$i]['page']=self::$page-6; $list[$i]['hidden']=true; $i++; }
-	if (((self::$page-5)>0) && !((self::$page+2)<(self::$pages+1))) { $list[$i]['page']=self::$page-5; $list[$i]['hidden']=true; $i++; }
-	if (((self::$page-4)>0) && !((self::$page+1)<(self::$pages+1))) { $list[$i]['page']=self::$page-4; $list[$i]['hidden']=true; $i++; }
-	if ((self::$page-3)>0) { $list[$i]['page']=self::$page-3; $list[$i]['hidden']=true; $i++; }
-	if ((self::$page-2)>0) { $list[$i]['page']=self::$page-2; $list[$i]['hidden']=true; $i++; }
-	if ((self::$page-1)>0) { $list[$i]['page']=self::$page-1; $list[$i]['hidden']=true; $i++; }
-	$list[$i]['page']=self::$page; $list[$i]['active']=true; $i++;
-	if ((self::$page+1)<(self::$pages+1)) { $list[$i]['page']=self::$page+1; $list[$i]['hidden']=true; $i++; }
-	if ((self::$page+2)<(self::$pages+1)) { $list[$i]['page']=self::$page+2; $list[$i]['hidden']=true; $i++; }
-	if ((self::$page+3)<(self::$pages+1)) { $list[$i]['page']=self::$page+3; $list[$i]['hidden']=true; $i++; }
-	if (((self::$page+4)<(self::$pages+1)) && !((self::$page-1)>0)) { $list[$i]['page']=self::$page+4; $list[$i]['hidden']=true; $i++; }
-	if (((self::$page+5)<(self::$pages+1)) && !((self::$page-2)>0)) { $list[$i]['page']=self::$page+5; $list[$i]['hidden']=true; $i++; }
-	if (((self::$page+6)<(self::$pages+1)) && !((self::$page-3)>0)) { $list[$i]['page']=self::$page+6; $list[$i]['hidden']=true; $i++; }
-
-	if ((self::$page-1)>0) { self::$prev=true; }
-	if ((self::$page+1)<(self::$pages+1)) { self::$next=true; }
-	return $list;
+	return false;
 }
+
+public static function getLineLog($line,$i=0) {
+	$s="<small>"+strval(url::$first)."</small> <b>".self::$name."</b> <small>".self::$mnn."</small><br>";
+	return $s;
+}
+
+public static function checkLine($s="") {
+	$s=preg_replace('/<a(.*?)>/i',"",$s);
+	$s=preg_replace('/<div(.*?)>/i',"",$s);
+	$s=preg_replace('/<\/title>/i',"",$s);
+	$s=preg_replace('/<style>(.*?)<\/style>/i',"",$s);
+	$s=preg_replace('/<\/a>/i',"",$s);
+	$s=preg_replace('/<\//i',"",$s);
+	$s=trim($s);
+	return $s;
+}
+	
 
 } ?>

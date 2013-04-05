@@ -7,11 +7,8 @@ $ ->
 				type:'json'
 				debug:false
 				action:'submit'
-				login:$('#inputLogin').val()
-				password:$('#inputPassword').val()
-				page:$('#page').val()
-				id:''
-				message:''
+				first:$('#page-first').val()
+				last:$('#page-last').val()
 			$.extend true,def,options
 			def.type='text' if def.debug
 			sn=$(@).data('sn');
@@ -20,12 +17,8 @@ $ ->
 				type:'POST'
 				data:
 					action:def.action
-					page:def.page
-					login:def.login
-					password:def.password
-					id:def.id
-					message:def.message
-					key:sn.result.key
+					first:def.first
+					last:def.last
 				dataType:def.type
 				timeout:10000
 				beforeSend: ->

@@ -13,9 +13,6 @@ function __construct() {
 
 function getResponseString($s="") {
 	if ($s) {
-		console::write("---");
-		console::write("response:");
-		console::write($s);
 		if (isset(url::$callback)) {
 			return url::$callback."(".$s.");";
 		} else {
@@ -27,13 +24,9 @@ function getResponseString($s="") {
 
 function getAction() {
 	if (isset(url::$action)) {
-		console::write("action: ".url::$action);
 		switch(url::$action) {
-			case "signin":
-				self::$response=project::signin(); return true;				
-			break;
-			case "edit":
-				self::$response=project::edit(); return true;				
+			case "get":
+				self::$response=project::get(); return true;
 			break;
 		}
 	}
@@ -41,7 +34,7 @@ function getAction() {
 }
 
 function getControls() {
-	foreach (array("signin","url","sql","project","app","console") as $key) {
+	foreach (array("url","sql","project","app") as $key) {
 		if (!file_exists(project."/controls/".$key.".php")) return false;
 		require_once(project."/controls/".$key.".php");
 		sn::cl($key);

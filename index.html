@@ -20,23 +20,26 @@
   </head>
   <body>
     <div id="sn"></div>
-    <div id="main">			
-      <div id="text">
-        <div class="container">
-          <div class="row">
-            <div class="span12">
-              <div class="well">
-                <h4>Стандарт-Н</h4>
-              </div>
+    <div id="main">
+      <div class="container">
+        <div class="row">
+          <div class="span12">
+            <p><a id="btn-start" href="#" class="btn btn-medium btn-primary"> <i class="icon-play icon-white"></i>&nbsp;
+                Старт</a><a id="btn-stop" href="#" class="hide btn btn-medium btn-danger"> <i class="icon-pause icon-white"></i>&nbsp;
+                Стоп</a>
+              <input id="status" type="hidden" value="stop">&nbsp;<a id="btn-open" href="http://www.4doktor.ru/?subid=0&amp;sort=Title%20ASC&amp;page=0" target="_blank" class="btn btn-medium"><i class="icon-share"></i>&nbsp;
+                Открыть страницу</a>
+            </p>
+            <div class="well well-small">
+              <input id="page-first" type="text" placeholder="Начальная страница" value="0" class="input-small">
+              <input id="page-last" type="text" placeholder="Конечная страница" value="10" class="input-small">
+            </div>
+            <div class="well">
+              <div id="response"></div>
             </div>
           </div>
         </div>
       </div>
-      <div id="signin"></div>
-      <div id="controls"></div>
-      <div id="table"></div>
-      <div id="pagination"></div>
-      <div id="stat"></div>
     </div>
     <div id="js">
       <script src="public/assets/client.js" type="text/javascript"></script>
