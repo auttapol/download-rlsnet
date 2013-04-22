@@ -16,6 +16,7 @@ public static $last;
 public static $text;
 public static $path;
 public static $message;
+public static $content;
 
 public static $date;
 public static $name;
@@ -29,56 +30,64 @@ function __construct() {
 	self::$first=0;
 	self::$last=1;
 	self::$text="";
+	self::$content="asfa";
 }
 
-public static function getContent($t="") {
-	$t=preg_replace('/\r/m',"",$t);
-	$t=preg_replace('/\n/m',"",$t);
-	$t=preg_replace('/\t/m',"",$t);
-	preg_match_all('/<table border="0" cellpadding="0" cellspacing="0" class="grid">(.*?)<\/table>/i',$t,$c,PREG_PATTERN_ORDER);
-	$t=$c[0][0];
-
-	$t=preg_replace('/<tr class="table_row">/mi',"<tr>",$t);
-	$t=preg_replace('/<tr >/mi',"<tr>",$t);
-	$t=preg_replace('/<td class="cell">/mi',"<td>",$t);
-
-	$t=preg_replace('/>[\s]*</i',"><",$t);
-	$t=preg_replace('/<\/tr>/i',"",$t);
-	$t=preg_replace('/<\/tr>/i',"",$t);
-	$t=preg_replace('/<\/td>/i',"",$t);
-	$t=preg_replace('/table>/i',"",$t);
-	$t=preg_replace('/~/i',"-",$t);
-	return $t;
-}
 
 public static function get() {
-	$s=""; $i=-1;
-	self::$path="http://www.4doktor.ru/?subid=0&sort=Title%20ASC&page=".intval(url::$first);
-	$t=file_get_contents(self::$path);
-	if ($t) {
-		if ($t!="") {
-			$t=self::getContent($t);
-			$s=self::parseContent($t);
-			self::$text=$s;
-		}
-	}
-	return true;
+	// $s=""; $i=-1;
+	// self::$path="http://www.4doktor.ru/?subid=0&sort=Title%20ASC&page=".intval(url::$first);
+	// $t=file_get_contents(self::$path);
+	// if ($t) {
+	// 	if ($t!="") {
+	// 		$t=self::getContent($t);
+	// 		$s=self::parseContent($t);
+	// 		self::$text=$s;
+	// 	}
+	// }
+	// return true;
 }
 
-public static function parseContent($t,$s="") {
-	foreach (explode("<tr>",$t) as $str) { $i++;
-		if ($i>1) {
-			$line=explode("<td>", $str);
-			if (sizeof($line)>3) {
-				if (self::parseLine($line)) {
-					if (query(sql::ins())) {
-						$s.=self::getLineLog($line,$i);
-					}
-				}				
-			}
+public static function content() {
+	// if (url::$href) {
+	// 	self::$content=file_get_contents(url::$href);
+	// 	return true;
+	// }
+	if (url::$href) {
+		if( $curl = curl_init() ) {
+
+
+			$headers = array();
+			$headers[] = 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8';
+			$headers[] = 'Accept-Encoding: gzip, deflate';
+			$headers[] = 'Accept-Language: ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3';
+			$headers[] = 'Cache-Control: no-cache';
+			$headers[] = 'Connection: keep-alive';
+			$headers[] = 'Cookie: __utma=20033147.1622148547.1366107282.1366347206.1366351987.8; __utmz=20033147.1366107282.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none); __utmc=20033147; __utmb=20033147.6.10.1366351987; _ym_visorc=b';
+			$headers[] = 'Host: www.rlsnet.ru';
+			$headers[] = 'Pragma: no-cache';
+			$headers[] = 'Referer: http://www.rlsnet.ru/mnn_alf_letter_C0.htm';
+			$headers[] = 'User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:20.0) Gecko/20100101 Firefox/20.0';
+			
+			curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
+			curl_setopt($curl, CURLOPT_URL, url::$href);
+			curl_setopt($curl, CURLOPT_REFERER, 'http://www.rlsnet.ru/mnn_alf_letter_C0.htm');
+			curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+			curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
+			curl_setopt($curl, CURLOPT_HEADER, 1);
+			curl_setopt($curl, CURLOPT_GET, 1);
+			curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+			curl_setopt($curl, CURLOPT_USERAGENT, "Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:20.0) Gecko/20100101 Firefox/20.0");
+			curl_setopt($curl, CURLOPT_NOBODY, 1);
+			curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 30);
+			curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
+
+			$out = curl_exec($curl);
+			self::$content = $out;
+			curl_close($curl);
 		}
 	}
-	return $s;
+
 }
 
 public static function parseLine($line) {
@@ -94,21 +103,6 @@ public static function parseLine($line) {
 	return false;
 }
 
-public static function getLineLog($line,$i=0) {
-	$s="<small>"+strval(url::$first)."</small> <b>".self::$name."</b> <small>".self::$mnn."</small><br>";
-	return $s;
-}
-
-public static function checkLine($s="") {
-	$s=preg_replace('/<a(.*?)>/i',"",$s);
-	$s=preg_replace('/<div(.*?)>/i',"",$s);
-	$s=preg_replace('/<\/title>/i',"",$s);
-	$s=preg_replace('/<style>(.*?)<\/style>/i',"",$s);
-	$s=preg_replace('/<\/a>/i',"",$s);
-	$s=preg_replace('/<\//i',"",$s);
-	$s=trim($s);
-	return $s;
-}
 	
 
 } ?>

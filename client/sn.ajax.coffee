@@ -1,50 +1,55 @@
 $ ->
 	methods= 
-		init:(options) ->
-		sendRequest:(options) ->
-			options={} if !options
+		init: (options = {}) ->
+
+		get: (options = {}) ->
+			_this = this
 			def=
-				type:'json'
-				debug:false
-				action:'submit'
-				first:$('#page-first').val()
-				last:$('#page-last').val()
+				url:		'//api-dev.oz.st-n.ru'
+				type:		'jsonp'
+				action:		'get'
+				href:		''
+			$.extend true,def,options
+			console.log 'request', def
+			$.ajax 
+				url:		def.url
+				async:		on
+				type:		'GET'
+				data:		def
+				dataType:	def.type
+				timeout:	1000000
+
+				success: (s) ->
+					console.log 'response', s
+					if s.fn?
+						$(_this).snClient s.fn, s
+
+
+		put:(options = {}) ->
+			_this = this
+			def=
+				url:		'//api-dev.oz.st-n.ru'
+				type:		'jsonp'
+				action:		'put'
 			$.extend true,def,options
 			def.type='text' if def.debug
-			sn=$(@).data('sn');
 			$.ajax 
-				url:'index.php'
-				type:'POST'
-				data:
-					action:def.action
-					first:def.first
-					last:def.last
-				dataType:def.type
-				timeout:10000
-				beforeSend: ->
-					$("#loading").show()
+				url:		def.url
+				type:		'GET'
+				data: 		def
+				dataType:	def.type
+				timeout:	10000
+
 				success: (s) ->
-					if typeof s=='object'
-						$.extend true,sn.result,s
-					else 
-						alert s if def.debug
-						sn.result=s
-					$(@).data('sn',sn)
-					if typeof sn.result=='object'
-						alert sn.result.alert if sn.result.alert
-						$(@).snEvents href:'#'+sn.result.callback if sn.result.callback
-					$("#loading").hide()
-				error: (XMLHttpRequest,textStatus,error) ->
+					console.log 'response', s
+
 				
 	$.fn.snAjax= (sn) ->
 		sn={} if !sn
 		if methods[sn] 
-			methods[sn].apply @,Array.prototype.slice.call arguments,1
+			methods[sn].apply this,Array.prototype.slice.call arguments,1
 		else 
-			if typeof sn=='object' || !sn
-				methods.init.apply @,arguments
-			else 
-				$.error 'Метод '+sn+' не существует'
+			methods.init.apply @,arguments
 
 
 

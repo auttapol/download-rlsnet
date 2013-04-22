@@ -1,6 +1,8 @@
 $ ->
 	methods=
-		init:(options) ->
+		init:(options = {}) ->
+
+
 			def=
 				href:'none'
 			$.extend true,def,options
@@ -9,8 +11,9 @@ $ ->
 			switch href.replace /(.*)#(.*)/,'$2'
 				when "autoload" then
 				
-				when "get"
-					$(this).snAjax 'sendRequest',(action:'get',debug:false)
+				when "content"
+					console.log 'content' 
+					$(this).snAjax 'getContentFromSite'
 				
 				when "afterGet"
 					# alert sn.result.text
@@ -19,22 +22,25 @@ $ ->
 							$("#response").html sn.result.text
 							# +$("#response").html()
 					$('#page-first').val parseInt($('#page-first').val())+1
-					if parseInt($('#page-first').val()) <= parseInt($('#page-last').val())
-						if $('#status').val() == 'start'
-							$(this).snEvents href:'#get'
+					
+					# if parseInt($('#page-first').val()) <= parseInt($('#page-last').val())
+					#	if $('#status').val() == 'start'
+					#		$(this).snEvents href:'#get'
 
 				when "start"
-					if $('#status').val() == 'stop'
-						$('#btn-start').hide()
-						$('#btn-stop').show()
-						$('#status').val('start')
-						$(this).snEvents href:'#get'
+					console.log 'start'
+					$(this).snClient 'getList'
+					#if $('#status').val() == 'stop'
+						#$('#btn-start').hide()
+						#$('#btn-stop').show()
+						#$('#status').val('start')
+						#$(this).snEvents href:'#content'
 
-				when "stop"
-					if $('#status').val() == 'start'
-						$('#btn-start').show()
-						$('#btn-stop').hide()
-						$('#status').val('stop')
+				when "stop" then
+					#if $('#status').val() == 'start'
+						#$('#btn-start').show()
+						#$('#btn-stop').hide()
+						#$('#status').val('stop')
 
 				when "close" then $(this).hide()
 

@@ -7,9 +7,8 @@ $ ->
 				result:
 					key:''
 			$.extend true,def,options
-			$(@).data 'sn',def
-			$(@).snTriggers()
-			$(@).snEvents 'href':'#autoload'
+			$(this).data 'sn',def
+			$(this).snTriggers()
 
 	$.fn.sn= (sn) ->
 		sn={} if !sn

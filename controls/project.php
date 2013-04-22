@@ -17,4 +17,13 @@ public static function get($j=array()) {
 	return $j;
 }
 
+public static function content($j=array()) {
+	app::content();
+	$j['content']=app::$content;
+	$j['href']=url::$href;
+	$j['callback']="afterContent";
+	$j['response']=true;
+	return $j;
+}
+
 } ?>

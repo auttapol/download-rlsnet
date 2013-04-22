@@ -28,6 +28,9 @@ function getAction() {
 			case "get":
 				self::$response=project::get(); return true;
 			break;
+			case "content":
+				self::$response=project::content(); return true;
+			break;
 		}
 	}
 	return false;

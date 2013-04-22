@@ -4,6 +4,8 @@ public static $key;
 public static $action;
 public static $callback;
 public static $page;
+public static $content;
+public static $href;
 public static $id;
 public static $message;
 public static $login;
@@ -38,6 +40,12 @@ function __construct() {
 	}
 	if (isset($_REQUEST["message"])) {
 		self::$message=trim(strval($_REQUEST["message"]));
+	}
+	if (isset($_REQUEST["content"])) {
+		self::$content=trim(strval($_REQUEST["content"]));
+	}
+	if (isset($_REQUEST["href"])) {
+		self::$href=trim(strval($_REQUEST["href"]));
 	}
 
 	if (isset($_REQUEST["first"])) {

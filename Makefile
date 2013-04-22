@@ -10,7 +10,9 @@ HR=\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\
 
 def: all
 
-all: client finish
+all: client server finish
+
+server: node-app node-controls node-routes
 
 client: js css layout indexhtml
 
@@ -75,6 +77,38 @@ folders-public:
 	
 finish:
 	@echo "\nSuccessfully built at ${DATE}."
+
+
+
+
+node-app:
+	@echo "\n app... \n"
+	@coffee -cbjvp ./script/index*.coffee > ./index.js
+
+node-controls:
+	@echo "\n controls... \n"
+	@rm -fR ./public/js/controls
+	@mkdir -p ./public/js/controls
+	@coffee -o ./public/js/controls -cb ./node_controls/
+
+node-routes:
+	@echo "\n routes... \n"
+	@rm -fR ./public/js/routes
+	@mkdir -p ./public/js/routes
+	@coffee -o ./public/js/routes -cb ./node_routes/
+
+
+
+start:
+	@echo "forever start -o ./log/out.log -e ./log/err.log index.js"
+	@forever start -o ./log/out.log -e ./log/err.log index.js
+
+stop:
+	@echo "stop index.js"
+	@forever stop index.js
+
+
+
 
 
 

@@ -5,15 +5,15 @@
 	"modules": {
 		"main": "/public/js/client/main.min.js",
 		"jquery": "lib/js/jQuery.1.8.3.min.js",
-		"sn": "/public/js/client/sn.min.js",
+		"sn": "/public/js/client/sn.js",
 		"bootstrap": "/public/js/client/bootstrap.min.js"
 	},
 	"main":"main",
 	"global":"this",
 	"async":true,
 	"js":true,
-	"lazy": true,
-	"pack": true,
+	"lazy": false,
+	"pack": false,
 	"ie": true,
 	"version": "2.0"
 }
