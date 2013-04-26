@@ -1,4 +1,4 @@
-
+###
 express = require 'express'
 jade = require 'jade'
 global.controls = require './public/js/controls'
@@ -44,7 +44,7 @@ http.createServer(app).listen app.get('port'), () ->
 ###
 program = require 'commander'
 global.controls = require './public/js/controls'
-#global.dbsettings = require './conf/database.json'
+global.dbsettings = require './conf/database.json'
 #global.appsettings = require './settings/sms.json'
 routes = require './public/js/routes'
 
@@ -53,5 +53,5 @@ global.program = program
 					.option('-d, --debug','Show response in log')
 					.parse(process.argv)
 
-routes.index()
+routes.get()
 ###
