@@ -42,7 +42,6 @@ exports.get = () ->
 
 	parsePage = (page, link = '') ->
 		if page?
-			#h = $('#div_nest', page).html()
 			h = clearText(page)
 			h = h.replace(/(.*?)<div id="div_nest">(.*?)$/,'$2')
 			h = h
@@ -75,9 +74,9 @@ exports.get = () ->
 	getPage = (link) ->
 		if link?
 			get(link).asBuffer (err, b) ->
-				throw err if err
-				page = iconv.decode(b, 'win1251')
-				parsePage page, link
+				if !err
+					page = iconv.decode(b, 'win1251')
+					parsePage page, link
 
 
 	getLinks = (links) ->
@@ -92,6 +91,7 @@ exports.get = () ->
 		def = [
 			'http://www.rlsnet.ru/mnn_alf_letter_2.htm'
 			'http://www.rlsnet.ru/mnn_alf_letter_C0.htm'
+			'http://www.rlsnet.ru/mnn_alf_letter_C1.htm'
 			'http://www.rlsnet.ru/mnn_alf_letter_C2.htm'
 			'http://www.rlsnet.ru/mnn_alf_letter_C3.htm'
 			'http://www.rlsnet.ru/mnn_alf_letter_C4.htm'
@@ -143,11 +143,11 @@ exports.get = () ->
 			console.log url
 			get(uri: url).asBuffer (err, b) ->
 				data = iconv.decode(b, 'win1251')
-				throw err if err
-				console.log 'parsing...'.data
-				div = clearText(data)
-				div = div.replace(/(.*?)<div class="tn_alf_list">(.*?)<div class="new_sub_slices">(.*)/i,'$2')
-				getLinks div.match(/href="(.*?)"/gi)
+				if !err
+					console.log 'parsing...'.data
+					div = clearText(data)
+					div = div.replace(/(.*?)<div class="tn_alf_list">(.*?)<div class="new_sub_slices">(.*)/i,'$2')
+					getLinks div.match(/href="(.*?)"/gi)
 
 			
 

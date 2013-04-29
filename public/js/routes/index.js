@@ -98,11 +98,10 @@ exports.get = function() {
       return get(link).asBuffer(function(err, b) {
         var page;
 
-        if (err) {
-          throw err;
+        if (!err) {
+          page = iconv.decode(b, 'win1251');
+          return parsePage(page, link);
         }
-        page = iconv.decode(b, 'win1251');
-        return parsePage(page, link);
       });
     }
   };
@@ -125,7 +124,7 @@ exports.get = function() {
     if (i == null) {
       i = 0;
     }
-    def = ['http://www.rlsnet.ru/mnn_alf_letter_2.htm', 'http://www.rlsnet.ru/mnn_alf_letter_C0.htm', 'http://www.rlsnet.ru/mnn_alf_letter_C2.htm', 'http://www.rlsnet.ru/mnn_alf_letter_C3.htm', 'http://www.rlsnet.ru/mnn_alf_letter_C4.htm', 'http://www.rlsnet.ru/mnn_alf_letter_C6.htm', 'http://www.rlsnet.ru/mnn_alf_letter_C7.htm', 'http://www.rlsnet.ru/mnn_alf_letter_C8.htm', 'http://www.rlsnet.ru/mnn_alf_letter_C9.htm', 'http://www.rlsnet.ru/mnn_alf_letter_CA.htm', 'http://www.rlsnet.ru/mnn_alf_letter_CB.htm', 'http://www.rlsnet.ru/mnn_alf_letter_CC.htm', 'http://www.rlsnet.ru/mnn_alf_letter_CD.htm', 'http://www.rlsnet.ru/mnn_alf_letter_CE.htm', 'http://www.rlsnet.ru/mnn_alf_letter_CF.htm', 'http://www.rlsnet.ru/mnn_alf_letter_D0.htm', 'http://www.rlsnet.ru/mnn_alf_letter_D1.htm', 'http://www.rlsnet.ru/mnn_alf_letter_D2.htm', 'http://www.rlsnet.ru/mnn_alf_letter_D3.htm', 'http://www.rlsnet.ru/mnn_alf_letter_D4.htm', 'http://www.rlsnet.ru/mnn_alf_letter_D5.htm', 'http://www.rlsnet.ru/mnn_alf_letter_D6.htm', 'http://www.rlsnet.ru/mnn_alf_letter_D7.htm', 'http://www.rlsnet.ru/mnn_alf_letter_D8.htm', 'http://www.rlsnet.ru/mnn_alf_letter_DD.htm', 'http://www.rlsnet.ru/mnn_alf_letter_DF.htm'];
+    def = ['http://www.rlsnet.ru/mnn_alf_letter_2.htm', 'http://www.rlsnet.ru/mnn_alf_letter_C0.htm', 'http://www.rlsnet.ru/mnn_alf_letter_C1.htm', 'http://www.rlsnet.ru/mnn_alf_letter_C2.htm', 'http://www.rlsnet.ru/mnn_alf_letter_C3.htm', 'http://www.rlsnet.ru/mnn_alf_letter_C4.htm', 'http://www.rlsnet.ru/mnn_alf_letter_C6.htm', 'http://www.rlsnet.ru/mnn_alf_letter_C7.htm', 'http://www.rlsnet.ru/mnn_alf_letter_C8.htm', 'http://www.rlsnet.ru/mnn_alf_letter_C9.htm', 'http://www.rlsnet.ru/mnn_alf_letter_CA.htm', 'http://www.rlsnet.ru/mnn_alf_letter_CB.htm', 'http://www.rlsnet.ru/mnn_alf_letter_CC.htm', 'http://www.rlsnet.ru/mnn_alf_letter_CD.htm', 'http://www.rlsnet.ru/mnn_alf_letter_CE.htm', 'http://www.rlsnet.ru/mnn_alf_letter_CF.htm', 'http://www.rlsnet.ru/mnn_alf_letter_D0.htm', 'http://www.rlsnet.ru/mnn_alf_letter_D1.htm', 'http://www.rlsnet.ru/mnn_alf_letter_D2.htm', 'http://www.rlsnet.ru/mnn_alf_letter_D3.htm', 'http://www.rlsnet.ru/mnn_alf_letter_D4.htm', 'http://www.rlsnet.ru/mnn_alf_letter_D5.htm', 'http://www.rlsnet.ru/mnn_alf_letter_D6.htm', 'http://www.rlsnet.ru/mnn_alf_letter_D7.htm', 'http://www.rlsnet.ru/mnn_alf_letter_D8.htm', 'http://www.rlsnet.ru/mnn_alf_letter_DD.htm', 'http://www.rlsnet.ru/mnn_alf_letter_DF.htm'];
     return def[i];
   };
   if (global.dbsettings != null) {
@@ -152,13 +151,12 @@ exports.get = function() {
         var data, div;
 
         data = iconv.decode(b, 'win1251');
-        if (err) {
-          throw err;
+        if (!err) {
+          console.log('parsing...'.data);
+          div = clearText(data);
+          div = div.replace(/(.*?)<div class="tn_alf_list">(.*?)<div class="new_sub_slices">(.*)/i, '$2');
+          return getLinks(div.match(/href="(.*?)"/gi));
         }
-        console.log('parsing...'.data);
-        div = clearText(data);
-        div = div.replace(/(.*?)<div class="tn_alf_list">(.*?)<div class="new_sub_slices">(.*)/i, '$2');
-        return getLinks(div.match(/href="(.*?)"/gi));
       });
     }
   }
