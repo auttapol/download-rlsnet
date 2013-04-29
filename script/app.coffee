@@ -50,7 +50,7 @@ routes = require './public/js/routes'
 
 global.program = program
 					.version('0.0.1')					
-					.option('-i, --index','Index in URL list', parseInt)
+					.option('-i, --index <n>','Index in URL list', parseInt)
 					.option('-d, --debug','Show response in log')
 					.parse(process.argv)
 

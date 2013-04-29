@@ -14,11 +14,14 @@ exports.get = () ->
 	iconv =				require('iconv-lite')
 	get =				require 'get'
 	mysql =				require 'mysql'
-	htmlparser =		require 'htmlparser'
-	$ =					require 'jquery'
 
 
-	#iconv = new Iconv 'cp1251', 'utf-8'
+	checkLink = (link, callback) ->
+		if link?
+			cn.query 'select * from rlsnet where link = ?', link, (err, rows) ->
+				if !(rows? and rows[0]? and rows[0].id > 0)
+					callback() if callback
+
 
 	clearText = (text) -> 
 		if text?
@@ -37,14 +40,18 @@ exports.get = () ->
 			text = text.replace(/\&?reg\;?/gi,'')
 		text
 
-	parsePage = (page) ->
+	parsePage = (page, link = '') ->
 		if page?
-			h = $('#div_nest', page).html()
-			h = clearText(h)
-			div = $('#tblpanel', page).html()
-			div = clearText(div)
+			#h = $('#div_nest', page).html()
+			h = clearText(page)
+			h = h.replace(/(.*?)<div id="div_nest">(.*?)$/,'$2')
+			h = h
+			div = clearText(page)
+			div = div.replace(/(.*?)<table border="0" cellspacing="0" cellpadding="0" width="100%" class="rest_nest" id="tblpanel">(.*?)$/,'$2')
 			if div?
-				caption = h.replace(/<!--tn_oglavlenie--><h2>(.*?)<\/h2>(.*?)<h2>(.*)/i,'$2')
+				caption = h.replace(/(.*?)<h2>(.*?)<\/h2>(.*?)<h2>(.*)/i,'$3')
+				caption = caption.replace(/<img(.*?)>/,'')
+				caption = caption.replace(/<a(.*?)><\/a>/,'')
 				names = div.match(/<td class="rest_data"(.*?)<\/td>/gi)
 				if names?
 					names.filter (value, i) -> 
@@ -53,38 +60,33 @@ exports.get = () ->
 							name = sanitize(name).escape()
 							name = sanitize(name).entityEncode()
 							name = clearTags(name)
-							console.log caption, name
+							console.log caption.data, name.info
 
 							values =
 								caption:	caption
 								name:		name
+								ind:		index
+								url:		url
+								link:		link
 							cn.query 'insert into rlsnet set ?', values, (err) ->
 								throw err if err
 
 
-				# console.log names
-		###
-		names = page.match(/<td class="rest_data">(.*?)<\/td>/gim)
-		if names.length > 0
-			names.filter (value, i) -> 
-		###
-
-
-
 	getPage = (link) ->
 		if link?
-			console.log link
 			get(link).asBuffer (err, b) ->
 				throw err if err
 				page = iconv.decode(b, 'win1251')
-				parsePage page
+				parsePage page, link
 
 
 	getLinks = (links) ->
 		if links?
 			links.filter (value, i) ->
 				link = value.replace(/href="(.*?)"/i,'$1')
-				getPage link
+				checkLink link, () ->
+					console.log 'link'.data, link.debug
+					getPage link
 
 	urls = (i = 0) ->
 		def = [
@@ -127,38 +129,26 @@ exports.get = () ->
 			user :			global.dbsettings.connections.mysql.login
 			password :		global.dbsettings.connections.mysql.password
 			database :		global.dbsettings.connections.mysql.dbname
-			#charset :		global.dbsettings.connections.mysql.charset
 
 	if cn?
 		cn.connect()
 
-		if program.index? 
-			url = urls program.index
+		if global.program? and global.program.index? 
+			index = global.program.index
 		else 
-			url = urls 0
+			index = 0
 
-		#url = urls 0
+		url = urls index	
 		if url?
 			console.log url
-			get(uri: url, max_redirs: 0, 'no_proxy').asBuffer (err, b) ->
+			get(uri: url).asBuffer (err, b) ->
 				data = iconv.decode(b, 'win1251')
 				throw err if err
-				console.log 'parsing...'
-				# console.log data
-				div = $('.tn_alf_list', data).html()
-				getLinks div.match(/href="(.*?)"/gim)
+				console.log 'parsing...'.data
+				div = clearText(data)
+				div = div.replace(/(.*?)<div class="tn_alf_list">(.*?)<div class="new_sub_slices">(.*)/i,'$2')
+				getLinks div.match(/href="(.*?)"/gi)
 
-				#cn.query 'insert into rlsnet set ?', values, (err) ->
-				#	throw err if err
 			
 
 
-
-		
-	###
-	throw err if err
-	res.jsonp
-		href:			req.query.href
-		fn:				req.query.fn
-		html:			data
-	###

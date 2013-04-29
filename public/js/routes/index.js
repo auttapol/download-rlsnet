@@ -10,7 +10,7 @@ exports.index = function(req, res) {
 };
 
 exports.get = function() {
-  var $, check, clearTags, clearText, cn, colors, get, getLinks, getPage, htmlparser, iconv, mysql, parsePage, sanitize, url, urls;
+  var check, checkLink, clearTags, clearText, cn, colors, get, getLinks, getPage, iconv, index, mysql, parsePage, sanitize, url, urls;
 
   colors = global.controls.lib.colors();
   check = require('validator').check;
@@ -18,8 +18,17 @@ exports.get = function() {
   iconv = require('iconv-lite');
   get = require('get');
   mysql = require('mysql');
-  htmlparser = require('htmlparser');
-  $ = require('jquery');
+  checkLink = function(link, callback) {
+    if (link != null) {
+      return cn.query('select * from rlsnet where link = ?', link, function(err, rows) {
+        if (!((rows != null) && (rows[0] != null) && rows[0].id > 0)) {
+          if (callback) {
+            return callback();
+          }
+        }
+      });
+    }
+  };
   clearText = function(text) {
     if (text != null) {
       text = text.replace(/\n/gi, '');
@@ -39,16 +48,22 @@ exports.get = function() {
     }
     return text;
   };
-  parsePage = function(page) {
+  parsePage = function(page, link) {
     var caption, div, h, names;
 
+    if (link == null) {
+      link = '';
+    }
     if (page != null) {
-      h = $('#div_nest', page).html();
-      h = clearText(h);
-      div = $('#tblpanel', page).html();
-      div = clearText(div);
+      h = clearText(page);
+      h = h.replace(/(.*?)<div id="div_nest">(.*?)$/, '$2');
+      h = h;
+      div = clearText(page);
+      div = div.replace(/(.*?)<table border="0" cellspacing="0" cellpadding="0" width="100%" class="rest_nest" id="tblpanel">(.*?)$/, '$2');
       if (div != null) {
-        caption = h.replace(/<!--tn_oglavlenie--><h2>(.*?)<\/h2>(.*?)<h2>(.*)/i, '$2');
+        caption = h.replace(/(.*?)<h2>(.*?)<\/h2>(.*?)<h2>(.*)/i, '$3');
+        caption = caption.replace(/<img(.*?)>/, '');
+        caption = caption.replace(/<a(.*?)><\/a>/, '');
         names = div.match(/<td class="rest_data"(.*?)<\/td>/gi);
         if (names != null) {
           return names.filter(function(value, i) {
@@ -59,10 +74,13 @@ exports.get = function() {
               name = sanitize(name).escape();
               name = sanitize(name).entityEncode();
               name = clearTags(name);
-              console.log(caption, name);
+              console.log(caption.data, name.info);
               values = {
                 caption: caption,
-                name: name
+                name: name,
+                ind: index,
+                url: url,
+                link: link
               };
               return cn.query('insert into rlsnet set ?', values, function(err) {
                 if (err) {
@@ -74,16 +92,9 @@ exports.get = function() {
         }
       }
     }
-    /*
-    		names = page.match(/<td class="rest_data">(.*?)<\/td>/gim)
-    		if names.length > 0
-    			names.filter (value, i) ->
-    */
-
   };
   getPage = function(link) {
     if (link != null) {
-      console.log(link);
       return get(link).asBuffer(function(err, b) {
         var page;
 
@@ -91,7 +102,7 @@ exports.get = function() {
           throw err;
         }
         page = iconv.decode(b, 'win1251');
-        return parsePage(page);
+        return parsePage(page, link);
       });
     }
   };
@@ -101,7 +112,10 @@ exports.get = function() {
         var link;
 
         link = value.replace(/href="(.*?)"/i, '$1');
-        return getPage(link);
+        return checkLink(link, function() {
+          console.log('link'.data, link.debug);
+          return getPage(link);
+        });
       });
     }
   };
@@ -124,35 +138,28 @@ exports.get = function() {
   }
   if (cn != null) {
     cn.connect();
-    if (program.index != null) {
-      url = urls(program.index);
+    if ((global.program != null) && (global.program.index != null)) {
+      index = global.program.index;
     } else {
-      url = urls(0);
+      index = 0;
     }
+    url = urls(index);
     if (url != null) {
       console.log(url);
       return get({
-        uri: url,
-        max_redirs: 0
-      }, 'no_proxy').asBuffer(function(err, b) {
+        uri: url
+      }).asBuffer(function(err, b) {
         var data, div;
 
         data = iconv.decode(b, 'win1251');
         if (err) {
           throw err;
         }
-        console.log('parsing...');
-        div = $('.tn_alf_list', data).html();
-        return getLinks(div.match(/href="(.*?)"/gim));
+        console.log('parsing...'.data);
+        div = clearText(data);
+        div = div.replace(/(.*?)<div class="tn_alf_list">(.*?)<div class="new_sub_slices">(.*)/i, '$2');
+        return getLinks(div.match(/href="(.*?)"/gi));
       });
     }
   }
-  /*
-  	throw err if err
-  	res.jsonp
-  		href:			req.query.href
-  		fn:				req.query.fn
-  		html:			data
-  */
-
 };

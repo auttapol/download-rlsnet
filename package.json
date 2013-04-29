@@ -2,7 +2,7 @@
   "name": "sn-rlsnet",
   "preferGlobal": false,
   "description": "standart-n project",
-  "version": "0.0.8",
+  "version": "0.1.0",
   "author": "aleksnick <aleksnick01@list.ru>",
   "maintainers": [
     "aleksnick <aleksnick01@list.ru>"
@@ -27,8 +27,6 @@
     "mysql": "*",
     "commander": "*",
     "get": "*",
-    "jquery": "*",
-    "htmlparser": "*",
     "iconv-lite": "*",
     "colors": "*",
     "validator": "*"
