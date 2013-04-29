@@ -132,7 +132,12 @@ exports.get = () ->
 	if cn?
 		cn.connect()
 
-		url = urls 0
+		if program.index? 
+			url = urls program.index
+		else 
+			url = urls 0
+
+		#url = urls 0
 		if url?
 			console.log url
 			get(uri: url, max_redirs: 0, 'no_proxy').asBuffer (err, b) ->

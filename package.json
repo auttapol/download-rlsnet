@@ -1,15 +1,15 @@
 {
-  "name": "sn-project",
-  "preferGlobal": true,
+  "name": "sn-rlsnet",
+  "preferGlobal": false,
   "description": "standart-n project",
-  "version": "0.0.1",
+  "version": "0.0.8",
   "author": "aleksnick <aleksnick01@list.ru>",
   "maintainers": [
     "aleksnick <aleksnick01@list.ru>"
   ],
   "repository": {
     "type": "git",
-    "url": "http://github.com/standart-n/sn-project.git"
+    "url": "http://github.com/standart-n/download-rlsnet.git"
   },
   "keywords": [
     "cli",
@@ -18,30 +18,23 @@
     "project",
     "web"
   ],
-  "bin": "./sn-project",
-  "main": "./index.js",
+  "bin": "./sn-rlsnet",
+  "main": "./app",
   "scripts": {
     "test": "make start"
   },
   "dependencies": {
-    "express": "3.x",
     "mysql": "*",
-    "client-http": "*",
     "commander": "*",
-    "net": "*",
     "get": "*",
     "jquery": "*",
     "htmlparser": "*",
-    "encoding": "*",
-    "iconv": "*",
     "iconv-lite": "*",
     "colors": "*",
-    "validator": "*",
-    "jade": "*"
+    "validator": "*"
   },
   "engines": {
-    "node": "0.8.x"
+    "node": "0.10.5"
   },
-  "devDependencies": {
-  }
+  "devDependencies": {}
 }

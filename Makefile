@@ -10,7 +10,7 @@ HR=\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\
 
 def: all
 
-all: client server finish
+all: server finish
 
 server: node-app node-controls node-routes
 
@@ -83,9 +83,9 @@ finish:
 
 node-app:
 	@echo "\n app... \n"
-	@coffee -cbjvp ./script/index*.coffee > ./index.js
+	@coffee -cbjvp ./script/app*.coffee > ./app
 
-node-controls:
+node-controls:	
 	@echo "\n controls... \n"
 	@rm -fR ./public/js/controls
 	@mkdir -p ./public/js/controls
