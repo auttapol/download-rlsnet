@@ -33,6 +33,7 @@ exports.get = () ->
 		value = value.replace(/(.*?)<h2>(.*?)<\/h2>(.*?)<h2>(.*)/i,'$3')
 		value = value.replace(/<img(.*?)>/,'')
 		value = value.replace(/<a(.*?)><\/a>/,'')
+		value = clearTags(value)
 		value
 
 	getName = (value, res = null) ->
@@ -70,6 +71,9 @@ exports.get = () ->
 		if text?
 			text = text.replace(/\&?amp\;?/gi,'')
 			text = text.replace(/\&?nbsp\;?/gi,' ')
+			text = text.replace(/\&?raquo\;?/gi,'')
+			text = text.replace(/\&?laquo\;?/gi,'')
+			text = text.replace(/\&?BO-C\;?/gi,'')
 			text = text.replace(/\&?lt\;?/gi,'')
 			text = text.replace(/\&?gt\;?/gi,'')
 			text = text.replace(/\&?trade\;?/gi,'')
