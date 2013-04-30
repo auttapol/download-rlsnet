@@ -10,7 +10,7 @@ exports.index = function(req, res) {
 };
 
 exports.get = function() {
-  var check, checkLink, clearTags, clearText, cn, colors, get, getLinks, getPage, iconv, index, mysql, parsePage, sanitize, url, urls;
+  var check, checkLink, clearTags, clearText, cn, colors, get, getCaption, getLinks, getName, getNames, getPage, iconv, index, insertIntoBase, mysql, parsePage, sanitize, url, urls;
 
   colors = global.controls.lib.colors();
   check = require('validator').check;
@@ -18,6 +18,53 @@ exports.get = function() {
   iconv = require('iconv-lite');
   get = require('get');
   mysql = require('mysql');
+  insertIntoBase = function(caption, name, link) {
+    var values;
+
+    values = {
+      caption: caption,
+      name: name,
+      ind: index,
+      url: url,
+      link: link
+    };
+    return cn.query('insert into rlsnet set ?', values, function(err) {
+      if (!err) {
+        return console.log(caption.data, name.info);
+      }
+    });
+  };
+  getCaption = function(value) {
+    value = clearText(value);
+    value = value.replace(/(.*?)<div id="div_nest">(.*?)$/, '$2');
+    value = value.replace(/(.*?)<h2>(.*?)<\/h2>(.*?)<h2>(.*)/i, '$3');
+    value = value.replace(/<img(.*?)>/, '');
+    value = value.replace(/<a(.*?)><\/a>/, '');
+    return value;
+  };
+  getName = function(value, res) {
+    if (res == null) {
+      res = null;
+    }
+    if (value.match(/<a(.*?)>(.*?)<\/a>/i)) {
+      res = value.replace(/(.*)<a(.*?)>(.*?)<\/a>(.*)/i, '$3');
+      res = sanitize(res).escape();
+      res = sanitize(res).entityEncode();
+      res = clearTags(res);
+    }
+    return res;
+  };
+  getNames = function(value, res) {
+    if (res == null) {
+      res = [];
+    }
+    value = clearText(value);
+    value = value.replace(/(.*?)<table border="0" cellspacing="0" cellpadding="0" width="100%" class="rest_nest" id="tblpanel">(.*?)$/, '$2');
+    if (value != null) {
+      res = value.match(/<td class="rest_data"(.*?)<\/td>/gi);
+    }
+    return res;
+  };
   checkLink = function(link, callback) {
     if (link != null) {
       return cn.query('select * from rlsnet where link = ?', link, function(err, rows) {
@@ -43,53 +90,30 @@ exports.get = function() {
       text = text.replace(/\&?nbsp\;?/gi, ' ');
       text = text.replace(/\&?lt\;?/gi, '');
       text = text.replace(/\&?gt\;?/gi, '');
+      text = text.replace(/\&?trade\;?/gi, '');
       text = text.replace(/<?\/?sup>?/gi, '');
       text = text.replace(/\&?reg\;?/gi, '');
     }
     return text;
   };
   parsePage = function(page, link) {
-    var caption, div, h, names;
+    var caption, names;
 
     if (link == null) {
       link = '';
     }
     if (page != null) {
-      h = clearText(page);
-      h = h.replace(/(.*?)<div id="div_nest">(.*?)$/, '$2');
-      h = h;
-      div = clearText(page);
-      div = div.replace(/(.*?)<table border="0" cellspacing="0" cellpadding="0" width="100%" class="rest_nest" id="tblpanel">(.*?)$/, '$2');
-      if (div != null) {
-        caption = h.replace(/(.*?)<h2>(.*?)<\/h2>(.*?)<h2>(.*)/i, '$3');
-        caption = caption.replace(/<img(.*?)>/, '');
-        caption = caption.replace(/<a(.*?)><\/a>/, '');
-        names = div.match(/<td class="rest_data"(.*?)<\/td>/gi);
-        if (names != null) {
-          return names.filter(function(value, i) {
-            var name, values;
+      caption = getCaption(page);
+      names = getNames(page);
+      if (names != null) {
+        return names.filter(function(value, i) {
+          var name;
 
-            if (value.match(/<a(.*?)>(.*?)<\/a>/i)) {
-              name = value.replace(/(.*)<a(.*?)>(.*?)<\/a>(.*)/i, '$3');
-              name = sanitize(name).escape();
-              name = sanitize(name).entityEncode();
-              name = clearTags(name);
-              console.log(caption.data, name.info);
-              values = {
-                caption: caption,
-                name: name,
-                ind: index,
-                url: url,
-                link: link
-              };
-              return cn.query('insert into rlsnet set ?', values, function(err) {
-                if (err) {
-                  throw err;
-                }
-              });
-            }
-          });
-        }
+          name = getName(value);
+          if ((name != null) && (caption != null)) {
+            return insertIntoBase(caption, name, link);
+          }
+        });
       }
     }
   };
@@ -144,7 +168,7 @@ exports.get = function() {
     }
     url = urls(index);
     if (url != null) {
-      console.log(url);
+      console.log(url.debug);
       return get({
         uri: url
       }).asBuffer(function(err, b) {

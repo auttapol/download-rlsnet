@@ -15,6 +15,42 @@ exports.get = () ->
 	get =				require 'get'
 	mysql =				require 'mysql'
 
+	insertIntoBase = (caption, name, link) ->
+		values =
+			caption:	caption
+			name:		name
+			ind:		index
+			url:		url
+			link:		link
+		cn.query 'insert into rlsnet set ?', values, (err) ->
+			if !err
+				console.log caption.data, name.info
+
+
+	getCaption = (value) ->
+		value = clearText(value)
+		value = value.replace(/(.*?)<div id="div_nest">(.*?)$/,'$2')
+		value = value.replace(/(.*?)<h2>(.*?)<\/h2>(.*?)<h2>(.*)/i,'$3')
+		value = value.replace(/<img(.*?)>/,'')
+		value = value.replace(/<a(.*?)><\/a>/,'')
+		value
+
+	getName = (value, res = null) ->
+		if value.match(/<a(.*?)>(.*?)<\/a>/i)
+			res = value.replace(/(.*)<a(.*?)>(.*?)<\/a>(.*)/i,'$3')
+			res = sanitize(res).escape()
+			res = sanitize(res).entityEncode()
+			res = clearTags(res)
+		res
+
+	getNames = (value, res = []) ->
+		value = clearText(value)
+		value = value.replace(/(.*?)<table border="0" cellspacing="0" cellpadding="0" width="100%" class="rest_nest" id="tblpanel">(.*?)$/,'$2')
+		if value?
+			res = value.match(/<td class="rest_data"(.*?)<\/td>/gi)
+		res
+
+
 
 	checkLink = (link, callback) ->
 		if link?
@@ -36,39 +72,20 @@ exports.get = () ->
 			text = text.replace(/\&?nbsp\;?/gi,' ')
 			text = text.replace(/\&?lt\;?/gi,'')
 			text = text.replace(/\&?gt\;?/gi,'')
+			text = text.replace(/\&?trade\;?/gi,'')
 			text = text.replace(/<?\/?sup>?/gi,'')
 			text = text.replace(/\&?reg\;?/gi,'')
 		text
 
 	parsePage = (page, link = '') ->
 		if page?
-			h = clearText(page)
-			h = h.replace(/(.*?)<div id="div_nest">(.*?)$/,'$2')
-			h = h
-			div = clearText(page)
-			div = div.replace(/(.*?)<table border="0" cellspacing="0" cellpadding="0" width="100%" class="rest_nest" id="tblpanel">(.*?)$/,'$2')
-			if div?
-				caption = h.replace(/(.*?)<h2>(.*?)<\/h2>(.*?)<h2>(.*)/i,'$3')
-				caption = caption.replace(/<img(.*?)>/,'')
-				caption = caption.replace(/<a(.*?)><\/a>/,'')
-				names = div.match(/<td class="rest_data"(.*?)<\/td>/gi)
-				if names?
-					names.filter (value, i) -> 
-						if value.match(/<a(.*?)>(.*?)<\/a>/i)
-							name = value.replace(/(.*)<a(.*?)>(.*?)<\/a>(.*)/i,'$3')
-							name = sanitize(name).escape()
-							name = sanitize(name).entityEncode()
-							name = clearTags(name)
-							console.log caption.data, name.info
-
-							values =
-								caption:	caption
-								name:		name
-								ind:		index
-								url:		url
-								link:		link
-							cn.query 'insert into rlsnet set ?', values, (err) ->
-								throw err if err
+			caption = getCaption(page)
+			names = getNames(page)
+			if names?
+				names.filter (value, i) ->
+						name = getName (value)
+						if name? and caption?
+							insertIntoBase(caption, name, link)
 
 
 	getPage = (link) ->
@@ -140,7 +157,7 @@ exports.get = () ->
 
 		url = urls index	
 		if url?
-			console.log url
+			console.log url.debug
 			get(uri: url).asBuffer (err, b) ->
 				data = iconv.decode(b, 'win1251')
 				if !err
