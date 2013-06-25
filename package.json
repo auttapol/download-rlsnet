@@ -2,7 +2,7 @@
   "name": "sn-rlsnet",
   "preferGlobal": false,
   "description": "standart-n project",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "author": "aleksnick <aleksnick01@list.ru>",
   "maintainers": [
     "aleksnick <aleksnick01@list.ru>"
@@ -15,24 +15,23 @@
     "cli",
     "sn",
     "standart-n",
-    "project",
     "web"
   ],
   "bin": "./sn-rlsnet",
   "main": "./app",
   "scripts": {
-    "test": "make start"
-  },
-  "dependencies": {
-    "mysql": "*",
-    "commander": "*",
-    "get": "*",
-    "iconv-lite": "*",
-    "colors": "*",
-    "validator": "*"
+    "start": "make start"
   },
   "engines": {
     "node": "0.10.x"
   },
-  "devDependencies": {}
+  "devDependencies": {},
+  "dependencies": {
+    "commander": "~1.2.0",
+    "colors": "~0.6.0-1",
+    "get": "~1.2.1",
+    "iconv-lite": "~0.2.10",
+    "mysql": "~2.0.0-alpha8",
+    "validator": "~1.2.1"
+  }
 }
