@@ -8,12 +8,24 @@ exports.index = (req, res) ->
 
 exports.get = () ->
 
-	colors =			global.controls.lib.colors()
+	colors =			require('colors')
 	check =				require('validator').check
 	sanitize =			require('validator').sanitize
 	iconv =				require('iconv-lite')
 	get =				require 'get'
 	mysql =				require 'mysql'
+
+	colors.setTheme
+			silly: 'rainbow'
+			input: 'grey'
+			verbose: 'cyan'
+			prompt: 'grey'
+			info: 'green'
+			data: 'grey'
+			help: 'cyan'
+			warn: 'yellow'
+			debug: 'blue'
+			error: 'red'
 
 	insertIntoBase = (caption, name, link) ->
 		values =

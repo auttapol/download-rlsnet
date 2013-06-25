@@ -2,7 +2,7 @@
   "name": "sn-rlsnet",
   "preferGlobal": false,
   "description": "standart-n project",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": "aleksnick <aleksnick01@list.ru>",
   "maintainers": [
     "aleksnick <aleksnick01@list.ru>"
@@ -32,7 +32,7 @@
     "validator": "*"
   },
   "engines": {
-    "node": "0.10.5"
+    "node": "0.10.x"
   },
   "devDependencies": {}
 }
